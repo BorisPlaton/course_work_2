@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "course-work-2"
+version = "0.1.0"
+description = ""
+authors = ["Kirill <pnchkirill@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.95.1"
+pydantic = {extras = ["dotenv"], version = "^1.10.7"}
+uvicorn = "^0.22.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
