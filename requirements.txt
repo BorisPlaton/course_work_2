@@ -1,0 +1,9 @@
+# production
+uvicorn[standard]
+fastapi[all]
+pydantic[dotenv]
+PyMySQL[rsa]
+
+# development
+flake8
+pytest
