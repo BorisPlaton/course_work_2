@@ -10,7 +10,7 @@ def get_db_conn() -> Connection:
     Returns a new connection to the MySQL database. Closes connection
     automatically.
 
-    :return:
+    @return:
         A new instantiated connection to the database.
     """
     with pymysql.connect(
