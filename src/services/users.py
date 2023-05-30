@@ -205,6 +205,35 @@ class UserServices:
                 )
             return statistics
 
+    def check_user_is_teacher(
+        self,
+        *,
+        user_id: int
+    ) -> bool:
+        """
+        Checks whether the user is a teacher.
+
+        @param user_id:
+            Which user should be checked.
+        @raise HTTPException:
+            If the user with provided id isn't a teacher, raises an exception
+            with 404 status code.
+        @return:
+            True if user is a teacher.
+        """
+        with self.conn.cursor() as cur:
+            cur.execute("""
+                SELECT user_id
+                FROM teachers
+                WHERE user_id = %s;
+            """, (user_id,))
+            if not cur.fetchone():
+                raise HTTPException(
+                    detail="Teacher with user id '%s' doesn't exist." % user_id,
+                    status_code=status.HTTP_404_NOT_FOUND,
+                )
+            return True
+
     def check_user_exists(
         self,
         *,

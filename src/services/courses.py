@@ -52,8 +52,14 @@ class CoursesServices:
         with self.conn.cursor() as cur:
             cur: cursors.DictCursor
             cur.execute("""
-                SELECT course_id, title, price, description
+                SELECT
+                    courses.course_id,
+                    courses.title,
+                    courses.price,
+                    courses.description,
+                    certificate.progress_pass
                 FROM courses
+                    JOIN certificate USING (course_id)
                 WHERE course_id = %s;
             """, (course_id,))
             course = cur.fetchone()
@@ -269,6 +275,48 @@ class CoursesServices:
             WHERE user_id = %(user_id)s AND course_id = %(course_id)s;
             """, {'user_id': user_id, 'course_id': course_id})
             self.conn.commit()
+
+    def get_user_certificate(
+        self,
+        *,
+        user_id: int,
+        course_id: int
+    ) -> dict:
+        """
+        Returns a course's certificate for the specific user.
+
+        @param user_id:
+            The user for which certificate is looked up.
+        @param course_id:
+            The certificate of this course.
+        @raise HTTPException:
+            If the user doesn't have a certificate for this course, raises
+            an exception with 404 status code.
+        @return:
+            A certificate if it exists.
+        """
+        services.UserServices(conn=self.conn).check_user_exists(user_id=user_id)
+        self.check_course_exists(course_id=course_id)
+        with self.conn.cursor() as cur:
+            cur: cursors.DictCursor
+            cur.execute("""
+            SELECT certificate.certificate_path, students.certificate_date
+            FROM certificate
+                JOIN courses USING (course_id)
+                JOIN students USING (course_id)
+            WHERE
+                students.course_id = %(course_id)s AND
+                students.user_id = %(user_id)s AND
+                students.progress >= certificate.progress_pass;
+            """, {'course_id': course_id, 'user_id': user_id})
+            if not (certificate := cur.fetchone()):
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="User with id '%s' doesn't have a certificate for the course with id '%s'." % (
+                        user_id, course_id
+                    )
+                )
+            return certificate
 
     def check_course_exists(
         self,

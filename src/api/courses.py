@@ -108,3 +108,18 @@ async def increase_student_progress(
         course_id=course_id,
         points_amount=points_amount,
     )
+
+
+@router.get('/{course_id}/students/{user_id}/certificate')
+def get_user_certificate(
+    conn: Annotated[Connection, Depends(get_db_conn)],
+    course_id: int,
+    user_id: int,
+):
+    """
+    Returns a user's certificate for the specific course, if he has it.
+    """
+    return CoursesServices(conn=conn).get_user_certificate(
+        course_id=course_id,
+        user_id=user_id,
+    )
